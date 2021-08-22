@@ -1,7 +1,6 @@
 import './style.css'
 import { get, post, del } from './http'
 
-
 const form = document.querySelector('[data-js="cars-form"]')
 const table = document.querySelector('[data-js="table"]')
 
