@@ -43,18 +43,28 @@ function createColor (value) {
 form.addEventListener('submit', (e) => {
   e.preventDefault()
   const getElement = getFormElement(e)
-  const image = getElement('image')
-  const brandModel = getElement('brand-model')
-  const year = getElement('year')
-  const plate = getElement('plate')
-  const color = getElement('color')
 
+  const data = {
+    image: getElement('image').value,
+    brandModel: getElement('brand-model').value,
+    year: getElement('year').value,
+    plate: getElement('plate').value,
+    color: getElement('color').value,
+  }
+
+  createTableRow(data)
+
+  e.target.reset()
+  image.focus()
+})
+
+function createTableRow (data) {
   const elements = [
-    { type: 'image', value: image.value },
-    { type: 'text', value: brandModel.value },
-    { type: 'text', value: year.value },
-    { type: 'text', value: plate.value },
-    { type: 'color', value: color.value }
+    { type: 'image', value: data.image },
+    { type: 'text', value: data.brandModel },
+    { type: 'text', value: data.year },
+    { type: 'text', value: data.plate },
+    { type: 'color', value: data.color }
   ]
 
   const tr = document.createElement('tr')
@@ -64,8 +74,34 @@ form.addEventListener('submit', (e) => {
   })
 
   table.appendChild(tr)
+}
 
-  e.target.reset()
-  image.focus()
-})
+function createNoCarRow() {
+  const tr = document.createElement('tr')
+  const td = document.createElement('td')
+  const ths = document.querySelectorAll('table th')
+  td.setAttribute('colspan', ths.length)
+  td.textContent = 'Nenhum carro encontrado'
+
+  tr.appendChild(td)
+  table.appendChild(tr)
+}
+
+async function main () {
+  const result = await fetch(url)
+    .then(r => r.json())
+    .catch(e => ({ error: true, message: e.message }))
+
+  if (result.error) {
+    console.log('Erro ao buscar carros', result.message)
+    return
+  }
+
+  if (result.length === 0) {
+    createNoCarRow()
+    return
+  }
+
+  result.forEach(createTableRow)
+}
 
