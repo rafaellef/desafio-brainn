@@ -1,4 +1,6 @@
 import './style.css'
+import { get, post, del } from './http'
+
 
 const form = document.querySelector('[data-js="cars-form"]')
 const table = document.querySelector('[data-js="table"]')
@@ -40,7 +42,7 @@ function createColor (value) {
   return td
 }
 
-form.addEventListener('submit', (e) => {
+form.addEventListener('submit', async (e) => {
   e.preventDefault()
   const getElement = getFormElement(e)
 
@@ -50,6 +52,18 @@ form.addEventListener('submit', (e) => {
     year: getElement('year').value,
     plate: getElement('plate').value,
     color: getElement('color').value,
+  }
+
+  const result = await post(url, data)
+
+  if (result.error) {
+    console.log('Erro na hora de cadastrar', result.message)
+    return
+  }
+
+  const noContent = document.querySelector('[data-js="no-content"]')
+  if (noContent) {
+    table.removeChild(noContent)
   }
 
   createTableRow(data)
@@ -68,12 +82,37 @@ function createTableRow (data) {
   ]
 
   const tr = document.createElement('tr')
+  tr.dataset.plate = data.plate
+
   elements.forEach(element => {
     const td = elementTypes[element.type](element.value)
     tr.appendChild(td)
   })
 
+  const button = document.createElement('button')
+  button.textContent = 'Excluir'
+  button.dataset.plate = data.plate
+  button.addEventListener('click', handleDelete)
+
+  tr.appendChild(button)
+
   table.appendChild(tr)
+}
+
+async function handleDelete (e) {
+  const button = e.target
+  const plate = button.dataset.plate
+
+  const result = await del(url, { plate })
+
+  if (result.error) {
+    console.log('Erro ao deletar', result.message)
+    return
+  }
+
+  const tr = document.querySelector(`tr[data-plate="${plate}"]`)
+  table.removeChild(tr)
+  button.removeEventListener('click', handleDelete)
 }
 
 function createNoCarRow() {
@@ -83,14 +122,13 @@ function createNoCarRow() {
   td.setAttribute('colspan', ths.length)
   td.textContent = 'Nenhum carro encontrado'
 
+  tr.dataset.js = 'no-content'
   tr.appendChild(td)
   table.appendChild(tr)
 }
 
 async function main () {
-  const result = await fetch(url)
-    .then(r => r.json())
-    .catch(e => ({ error: true, message: e.message }))
+  const result = await get(url)
 
   if (result.error) {
     console.log('Erro ao buscar carros', result.message)
