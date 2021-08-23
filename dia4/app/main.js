@@ -53,6 +53,7 @@ form.addEventListener('submit', async (e) => {
     color: getElement('color').value,
   }
 
+  const url = "http://localhost:3333/cars"
   const result = await post(url, data)
 
   if (result.error) {
@@ -102,6 +103,7 @@ async function handleDelete (e) {
   const button = e.target
   const plate = button.dataset.plate
 
+  const url = "http://localhost:3333/cars"
   const result = await del(url, { plate })
 
   if (result.error) {

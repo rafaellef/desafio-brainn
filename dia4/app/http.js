@@ -1,3 +1,4 @@
+
 const request = (url, options) =>
   fetch(url, options)
     .then(r => r.json())
@@ -6,7 +7,7 @@ const request = (url, options) =>
 const createOptions = (method, data) => ({
   method,
   headers: {
-    'content-type': 'application/json'
+    'content-type': 'application/json',
   },
   body: JSON.stringify(data)
 })
